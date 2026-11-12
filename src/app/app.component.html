@@ -1,0 +1,109 @@
+<main class="page-shell">
+  <header class="hero">
+    <a class="wordmark" href="/" aria-label="Snip home">
+      <span class="brand-mark" aria-hidden="true">s</span>
+      <span>snip</span>
+    </a>
+    <p class="eyebrow">A little link, a lot less URL</p>
+    <h1>Make long links <span>short and sweet.</span></h1>
+    <p class="hero-copy">
+      Turn any web address into a tidy link you can share anywhere.
+    </p>
+  </header>
+
+  <section class="create-card" aria-labelledby="create-title">
+    <h2 id="create-title" class="visually-hidden">Create a short link</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label class="visually-hidden" for="long-url">URL to shorten</label>
+      <div class="input-row">
+        <span class="link-icon" aria-hidden="true">↗</span>
+        <input
+          id="long-url"
+          type="url"
+          formControlName="url"
+          placeholder="Paste your long URL here..."
+          autocomplete="url"
+          [attr.aria-invalid]="urlControl.invalid && (urlControl.touched || urlControl.dirty) ? 'true' : null"
+          aria-describedby="url-hint url-error"
+        />
+        <button type="submit" [disabled]="submitting() || form.invalid">
+          {{ submitting() ? 'Creating…' : 'Shorten link' }}
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+      <p class="input-hint" id="url-hint">Use a valid HTTP or HTTPS address.</p>
+      <p class="field-error" id="url-error" role="alert">{{ urlError() }}</p>
+      @if (submitError()) {
+        <p class="notice notice-error" role="alert">{{ submitError() }}</p>
+      }
+      @if (createdLink(); as link) {
+        <div class="notice notice-success" role="status" aria-live="polite">
+          <span>Here’s your short link</span>
+          <a [href]="link.shortUrl">{{ link.shortUrl }}</a>
+        </div>
+      }
+    </form>
+  </section>
+
+  <section class="links-card" aria-labelledby="links-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Your collection</p>
+        <h2 id="links-title">Recent links</h2>
+      </div>
+      <button
+        class="refresh-button"
+        type="button"
+        (click)="refreshLinks()"
+        [disabled]="loading()"
+        aria-label="Refresh links"
+      >
+        Refresh
+      </button>
+    </div>
+
+    @if (loading()) {
+      <p class="status-message" role="status" aria-live="polite">Loading links…</p>
+    } @else if (loadError()) {
+      <div class="empty-state" role="alert">
+        <p>{{ loadError() }}</p>
+        <button class="text-button" type="button" (click)="refreshLinks()">Try again</button>
+      </div>
+    } @else if (links().length === 0) {
+      <p class="empty-state">No links yet. Create one above to get started.</p>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Short links and their visit counts</caption>
+          <thead>
+            <tr>
+              <th scope="col">Short link</th>
+              <th scope="col">Original URL</th>
+              <th scope="col" class="hits-column">Hits</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (link of links(); track link.code) {
+              <tr>
+                <td>
+                  <a class="short-link" [href]="link.shortUrl">{{ link.code }}</a>
+                </td>
+                <td class="original-url">
+                  <a [href]="link.url" target="_blank" rel="noopener noreferrer">
+                    {{ link.url }}
+                  </a>
+                </td>
+                <td class="hits-column">{{ link.hits }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <footer class="page-footer">
+    <span>Small links, made simple.</span>
+    <span>Snip · {{ links().length }} {{ links().length === 1 ? 'link' : 'links' }}</span>
+  </footer>
+</main>
