@@ -1,6 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, isDevMode } from '@angular/core';
 import { Observable } from 'rxjs';
+
+export function getLinksApiUrl(devMode: boolean, currentOrigin: string): string {
+  const origin = devMode ? 'http://localhost:3000' : currentOrigin;
+  return `${origin}/api/links`;
+}
 
 export interface Link {
   code: string;
@@ -13,7 +18,10 @@ export interface Link {
 @Injectable({ providedIn: 'root' })
 export class LinksService {
   private readonly http = inject(HttpClient);
-  private readonly linksUrl = 'http://localhost:3000/api/links';
+  private readonly linksUrl = getLinksApiUrl(
+    isDevMode(),
+    window.location.origin,
+  );
 
   list(): Observable<Link[]> {
     return this.http.get<Link[]>(this.linksUrl);
